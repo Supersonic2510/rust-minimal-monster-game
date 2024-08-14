@@ -18,7 +18,7 @@ impl Goblin {
     }
 }
 
-impl Monster for Goblin {
+impl MonsterActions for Goblin {
     fn attack(&self) -> &str {
         "The goblin swings its rusty sword!"
     }
