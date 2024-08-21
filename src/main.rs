@@ -1,14 +1,22 @@
+mod distributions;
 mod grid;
 mod monster;
+mod weapon;
 
 use rand::distributions::{Distribution, Uniform};
 use std::{cell::RefCell, rc::Rc};
 
 use grid::EnemyGrid;
 use monster::{Monster, MonsterFactory};
+use weapon::WeaponFactory;
 
 fn main() {
     let mut rng = rand::thread_rng(); // Create a random number generator
+
+    // Create a Sword Item
+    let sword = WeaponFactory::Sword.create();
+
+    println!("The sword is {:#?}", sword);
 
     // Create the monster grid
     let mut grid = EnemyGrid::new();
@@ -18,7 +26,7 @@ fn main() {
         grid.insert(MonsterFactory::random());
     }
 
-    //println!("The enemy grid is {:#?}", grid);
+    println!("The enemy grid is {:#?}", grid);
 
     // Simulate a turn
     let monster_array = grid.as_array();
