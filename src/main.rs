@@ -18,28 +18,65 @@ fn main() {
         grid.insert(MonsterFactory::random());
     }
 
-    println!("The enemy grid is {:#?}", grid);
+    //println!("The enemy grid is {:#?}", grid);
 
     // Simulate a turn
     let monster_array = grid.as_array();
     let player_array = Vec::new();
 
-    let entity_array: Vec<Rc<RefCell<dyn Monster>>> = monster_array
+    let mut entity_array: Vec<Rc<RefCell<dyn Monster>>> = monster_array
         .iter()
         .chain(player_array.iter())
         .cloned()
         .collect();
 
-    let entity_range = Uniform::new(0, entity_array.len()); // Create a uniform distribution in the range
+    // Sort the entities by speed in descending order
+    entity_array.sort_by(|a, b| {
+        let speed_a = a.borrow().get_speed();
+        let speed_b = b.borrow().get_speed();
+        speed_b.cmp(&speed_a) // For descending order
+    });
 
-    for entity in &entity_array {
-        let mut entity = entity.borrow_mut();
-        println!("Entity: {{{:#?}}} has taken a turn!", entity);
+    'turn_loop: for entity in entity_array.clone().into_iter() {
+        {
+            let entity = entity.borrow();
+            if entity.is_dead() {
+                continue 'turn_loop;
+            }
+        }
 
-        // Select a random target from monster_array
+        // Collect alive targets, including the current entity (if you want to attack yourself)
+        let alive_targets: Vec<Rc<RefCell<dyn Monster>>> = entity_array
+            .iter()
+            .filter(|target_pointer| !target_pointer.borrow().is_dead())
+            .cloned()
+            .collect();
+
+        // This is because yourself is included in the list of targets
+        if alive_targets.len() <= 1 {
+            println!("No more entities alive or only one entity left (self).");
+            break 'turn_loop;
+        }
+
+        println!("Entity: {:#?}", entity);
+
+        let entity_range = Uniform::new(0, alive_targets.len());
         let target_index = entity_range.sample(&mut rng);
-        let mut target = entity_array[target_index].borrow_mut();
 
-        entity.attack(&mut *target); // Perform the attack
+        let target = alive_targets[target_index].clone();
+
+        println!("Target: {:#?}", target);
+
+        // Attack the target
+        if Rc::ptr_eq(&entity, &target) {
+            entity.borrow_mut().attack_self();
+        } else {
+            entity.borrow_mut().attack(&mut *target.borrow_mut());
+        }
+
+        if target.borrow().is_dead() {
+            grid.remove(&target);
+            println!("{:#?} has died!", target);
+        }
     }
 }

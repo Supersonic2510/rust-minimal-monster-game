@@ -5,50 +5,68 @@ const GRID_SIZE: usize = 4;
 
 #[derive(Debug)]
 pub struct EnemyGrid {
-    pub upperLeft: Option<Rc<RefCell<dyn Monster>>>,
-    pub upperRight: Option<Rc<RefCell<dyn Monster>>>,
-    pub lowerLeft: Option<Rc<RefCell<dyn Monster>>>,
-    pub lowerRight: Option<Rc<RefCell<dyn Monster>>>,
+    pub upper_left: Option<Rc<RefCell<dyn Monster>>>,
+    pub upper_right: Option<Rc<RefCell<dyn Monster>>>,
+    pub lower_left: Option<Rc<RefCell<dyn Monster>>>,
+    pub lower_right: Option<Rc<RefCell<dyn Monster>>>,
 }
 
 impl EnemyGrid {
     pub fn new() -> Self {
         Self {
-            upperLeft: None,
-            upperRight: None,
-            lowerLeft: None,
-            lowerRight: None,
+            upper_left: None,
+            upper_right: None,
+            lower_left: None,
+            lower_right: None,
         }
     }
 
     // Simple function to insert a monster into the grid when no position is specified
     pub fn insert(&mut self, monster: Rc<RefCell<dyn Monster>>) {
-        if self.upperLeft.is_none() {
-            self.upperLeft = Some(monster);
-        } else if self.upperRight.is_none() {
-            self.upperRight = Some(monster);
-        } else if self.lowerLeft.is_none() {
-            self.lowerLeft = Some(monster);
-        } else if self.lowerRight.is_none() {
-            self.lowerRight = Some(monster);
+        if self.upper_left.is_none() {
+            self.upper_left = Some(monster);
+        } else if self.upper_right.is_none() {
+            self.upper_right = Some(monster);
+        } else if self.lower_left.is_none() {
+            self.lower_left = Some(monster);
+        } else if self.lower_right.is_none() {
+            self.lower_right = Some(monster);
         }
     }
 
     pub fn as_array(&self) -> Vec<Rc<RefCell<dyn Monster>>> {
         let mut monster_array = Vec::with_capacity(GRID_SIZE);
-        if let Some(monster) = &self.upperLeft {
+        if let Some(monster) = &self.upper_left {
             monster_array.push(monster.clone());
         }
-        if let Some(monster) = &self.upperRight {
+        if let Some(monster) = &self.upper_right {
             monster_array.push(monster.clone());
         }
-        if let Some(monster) = &self.lowerLeft {
+        if let Some(monster) = &self.lower_left {
             monster_array.push(monster.clone());
         }
-        if let Some(monster) = &self.lowerRight {
+        if let Some(monster) = &self.lower_right {
             monster_array.push(monster.clone());
         }
 
         return monster_array;
+    }
+
+    pub fn remove(&mut self, target: &Rc<RefCell<dyn Monster>>) {
+        let positions = [
+            &mut self.upper_left,
+            &mut self.upper_right,
+            &mut self.lower_left,
+            &mut self.lower_right,
+        ];
+
+        for position in positions {
+            if let Some(monster_rc) = position {
+                if Rc::ptr_eq(monster_rc, target) {
+                    *position = None;
+                    return;
+                }
+            }
+        }
     }
 }

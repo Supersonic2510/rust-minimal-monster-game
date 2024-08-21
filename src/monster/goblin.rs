@@ -1,9 +1,12 @@
 use super::Monster;
-use std::rc::Rc;
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
 
 const GOBLIN_NAME: &str = "Goblin";
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Goblin {
     name: Rc<str>,
     hit_points: i8,
@@ -25,13 +28,12 @@ impl Goblin {
 }
 
 impl Monster for Goblin {
-    fn attack(&mut self, enemy: &mut dyn Monster) -> &'static str {
+    fn attack(&mut self, enemy: &mut dyn Monster) {
         enemy.damage(1);
-        if enemy.is_dead() {
-            return "The enemy is already dead!";
-        }
+    }
 
-        return "The goblin swings its rusty sword!";
+    fn attack_self(&mut self) {
+        self.damage(1);
     }
 
     fn defend(&self) -> &'static str {

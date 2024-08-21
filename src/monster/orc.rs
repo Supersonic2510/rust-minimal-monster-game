@@ -1,9 +1,12 @@
 use super::Monster;
-use std::rc::Rc;
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
 
 const ORC_NAME: &str = "Orc";
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Orc {
     name: Rc<str>,
     hit_points: i8,
@@ -25,15 +28,12 @@ impl Orc {
 }
 
 impl Monster for Orc {
-    fn attack(&mut self, enemy: &mut dyn Monster) -> &str {
-        // Do damage to the enemy
-
+    fn attack(&mut self, enemy: &mut dyn Monster) {
         enemy.damage(1);
-        if enemy.is_dead() {
-            return "The enemy is already dead!";
-        }
+    }
 
-        return "The orc swings its rusty sword!";
+    fn attack_self(&mut self) {
+        self.damage(1);
     }
 
     fn defend(&self) -> &str {
